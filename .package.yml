@@ -1,0 +1,22 @@
+settings:
+    blas95: 
+        default: false
+        reduce: anyTrue 
+    core:
+        default: true
+        reduce: anyTrue 
+    intel:
+        default: true
+        reduce: anyTrue 
+    lapack95:
+        default: false
+        reduce: anyTrue 
+    rt:
+        default: false
+        reduce: anyTrue 
+    sequential:
+        default: false
+        reduce: anyTrue 
+    tbb:
+        default: false
+        reduce: anyTrue

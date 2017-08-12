@@ -73,5 +73,5 @@ project "MKL"
             filter {}
         end)
     else
-        warningf("MKL not found on this computer!")
+        warningf("MKL not found on this computer, please check your libraries!")
     end

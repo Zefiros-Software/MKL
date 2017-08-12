@@ -4,8 +4,7 @@ test/obj/*
 test/bin/*
 
 -- zpm
-.config.json
-docs/style/.assets.lua
+.config.yml
 
 -- git
 *.orig
@@ -34,6 +33,4 @@ Makefile
 
 -- ZPM 
 extern/
-assets/
 test/extern
-test/assets

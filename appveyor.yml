@@ -1,5 +1,5 @@
 platform:
   - Win32
 environment:
-    PYTHON: "C:\\Python35"
+  PYTHON: "C:\\Python35"
 build: off

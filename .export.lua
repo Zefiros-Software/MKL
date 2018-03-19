@@ -1,5 +1,6 @@
 function getICCVersion()
     versions = {
+        "ICPP_COMPILER18", 
         "ICPP_COMPILER17", 
         "ICPP_COMPILER16", 
         "ICPP_COMPILER15"

@@ -15,7 +15,7 @@ function getICCVersion()
 end
 
 project "MKL"
-    kind "None"
+    kind "StaticLib"
 
     local icpp = getICCVersion()
 

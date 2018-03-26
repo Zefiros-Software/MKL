@@ -11,9 +11,6 @@ settings:
   lapack95:
     default: false
     reduce: anyTrue 
-  rt:
-    default: false
-    reduce: anyTrue 
   sequential:
     default: false
     reduce: anyTrue 

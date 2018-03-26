@@ -38,9 +38,6 @@ project "MKL"
             if zpm.setting("lapack95") then
                 links( mkl64 .. "/mkl_lapack95_lp64.lib" )
             end
-            if zpm.setting("rt") then
-                links( mkl64 .. "/mkl_rt.lib" )
-            end
             if zpm.setting("sequential") then
                 links( mkl64 .. "/mkl_sequential.lib" )
             end
@@ -61,9 +58,6 @@ project "MKL"
             end
             if zpm.setting("lapack95") then
                 links( mkl32 .. "/mkl_lapack95.lib" )
-            end
-            if zpm.setting("rt") then
-                links( mkl32 .. "/mkl_rt.lib" )
             end
             if zpm.setting("sequential") then
                 links( mkl32 .. "/mkl_sequential.lib" )

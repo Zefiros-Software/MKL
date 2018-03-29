@@ -21,7 +21,7 @@ local function linkMKL(icpp)
 
     if os.ishost("linux") then
         libPrefix = "/lib"
-        libSuffix = ""
+        libSuffix = ".a"
     end
     
     local mkl64 = path.join(icpp, "mkl/lib/intel64/") .. libPrefix

@@ -24,7 +24,10 @@ project "MKL"
             includedirs(path.join(icpp, "mkl/include/"))    
         end)
 
-        local libPrefix = iif(os.ishost("linux"), "lib", "")
+        local libPrefix = ""
+        if os.ishost("linux") then
+            libPrefix = "lib"
+        end
         
         local mkl64 = path.join(icpp, "mkl/lib/intel64/") .. libPrefix
         filter "architecture:not x86"

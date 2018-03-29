@@ -15,7 +15,7 @@ function getICCVersion()
     return nil
 end
 
-local function linkMKL()
+local function linkMKL(icpp)
     local libPrefix = "/"
     local libSuffix = ".lib"
 
@@ -45,10 +45,6 @@ local function linkMKL()
             links( mkl64 .. "mkl_tbb_thread" .. libSuffix )
         end
 
-        if os.ishost("linux") then
-            libdirs { mkl64 }
-        end
-
     local mkl32 = path.join(icpp, "mkl/lib/ia32/") .. libPrefix
     filter "architecture:x86"
         if zpm.setting("blas95") then
@@ -69,10 +65,6 @@ local function linkMKL()
         if zpm.setting("tbb") then
             links( mkl32 .. "mkl_tbb_thread" .. libSuffix )
         end
-
-        if os.ishost("linux") then
-            libdirs { mkl32 }
-        end
 end
 
 project "MKL"
@@ -84,12 +76,12 @@ project "MKL"
             includedirs(path.join(icpp, "mkl/include/"))    
 
             if os.ishost("linux") then
-                linkMKL()
+                linkMKL(icpp)
             end
         end)
 
         if not os.ishost("linux") then
-            linkMKL()
+            linkMKL(icpp)
         end
 
         filter {}

@@ -47,6 +47,7 @@ local function linkMKL()
 
         if os.ishost("linux") then
             libdirs { mkl64 }
+        end
 
     local mkl32 = path.join(icpp, "mkl/lib/ia32/") .. libPrefix
     filter "architecture:x86"
@@ -70,7 +71,8 @@ local function linkMKL()
         end
 
         if os.ishost("linux") then
-            libdirs { mkl64 }
+            libdirs { mkl32 }
+        end
 end
 
 project "MKL"

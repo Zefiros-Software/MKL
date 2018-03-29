@@ -45,6 +45,9 @@ local function linkMKL()
             links( mkl64 .. "mkl_tbb_thread" .. libSuffix )
         end
 
+        if os.ishost("linux") then
+            libdirs { mkl64 }
+
     local mkl32 = path.join(icpp, "mkl/lib/ia32/") .. libPrefix
     filter "architecture:x86"
         if zpm.setting("blas95") then
@@ -65,6 +68,9 @@ local function linkMKL()
         if zpm.setting("tbb") then
             links( mkl32 .. "mkl_tbb_thread" .. libSuffix )
         end
+
+        if os.ishost("linux") then
+            libdirs { mkl64 }
 end
 
 project "MKL"

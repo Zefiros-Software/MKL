@@ -8,14 +8,18 @@ function getICCVersion()
     }
     for _, version in pairs(versions) do
         if os.getenv(version) ~= "" then
-            return os.getenv(version)
+            if version == "MKLROOT" then
+                return os.getenv(version), ""
+            else
+                return os.getenv(version), "mkl"
+            end
         end
     end
 
-    return nil
+    return nil, nil
 end
 
-local function linkMKL(icpp)
+local function linkMKL(icpp, mklDir)
     local libPrefix = "/"
     local libSuffix = ".lib"
 
@@ -24,7 +28,7 @@ local function linkMKL(icpp)
         libSuffix = ".a"
     end
     
-    local mkl64 = path.join(icpp, "mkl/lib/intel64/") .. libPrefix
+    local mkl64 = path.join(icpp, mklDir, "lib/intel64/") .. libPrefix
     filter "architecture:not x86"
         if zpm.setting("blas95") then
             links( mkl64 .. "mkl_blas95_lp64" .. libSuffix )
@@ -45,7 +49,7 @@ local function linkMKL(icpp)
             links( mkl64 .. "mkl_tbb_thread" .. libSuffix )
         end
 
-    local mkl32 = path.join(icpp, "mkl/lib/ia32/") .. libPrefix
+    local mkl32 = path.join(icpp, mklDir, "lib/ia32/") .. libPrefix
     filter "architecture:x86"
         if zpm.setting("blas95") then
             links( mkl32 .. "mkl_blas95" .. libSuffix )
@@ -70,18 +74,18 @@ end
 project "MKL"
     kind "StaticLib"
 
-    local icpp = getICCVersion()
+    local icpp, mklDir = getICCVersion()
     if icpp then
         zpm.export(function()
             includedirs(path.join(icpp, "mkl/include/"))    
 
             if os.ishost("linux") then
-                linkMKL(icpp)
+                linkMKL(icpp, mklDir)
             end
         end)
 
         if not os.ishost("linux") then
-            linkMKL(icpp)
+            linkMKL(icpp, mklDir)
         end
 
         filter {}

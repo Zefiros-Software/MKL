@@ -16,11 +16,11 @@ function getICCVersion()
 end
 
 local function linkMKL()
-    local libPrefix = ""
+    local libPrefix = "/"
     local libSuffix = "lib"
-    
+
     if os.ishost("linux") then
-        libPrefix = "lib"
+        libPrefix = "/lib"
         libSuffix = "a"
     end
     

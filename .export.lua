@@ -5,6 +5,7 @@ function getICCVersion()
         "ICPP_COMPILER16", 
         "ICPP_COMPILER15"
     }
+    print(versions)
     for _, version in pairs(versions) do
         if os.getenv(version) ~= "" then
             return os.getenv(version)

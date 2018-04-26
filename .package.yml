@@ -11,9 +11,6 @@ settings:
   lapack95:
     default: false
     reduce: anyTrue 
-  sequential:
-    default: false
-    reduce: anyTrue 
-  tbb:
-    default: false
-    reduce: anyTrue
+  backend:
+    default: sequential
+    reduce: first

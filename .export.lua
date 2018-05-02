@@ -16,18 +16,21 @@ function getICCVersion()
     }
     for _, version in pairs(versions) do
         local mklRoot = os.getenv(version)
+        local tbbRoot = mklRoot
         if mklRoot ~= "" and mklRoot ~= nil then
             if version ~= "MKLROOT" then
                 mklRoot = path.join(wrapEnv(version), "mkl")
+                tbbRoot = path.join(wrapEnv(version), "tbb")
             else
                 mklRoot = wrapEnv(version)
+                tbbRoot = wrapEnv("TBBROOT")
             end
 
-            return mklRoot
+            return mklRoot, tbbRoot
         end
     end
 
-    return nil
+    return nil, nil
 end
 
 local mklBackends = {
@@ -85,12 +88,27 @@ local function linkGroupedLinks(linkGroup, mklRoot)
     end
 end
 
-local function linkMKL(icpp, backend)
-    local mkl64 = path.join(icpp, "lib/intel64/")
+local function linkMKL(mklRoot, tbbRoot, backend)
+    local mkl64 = path.join(mklRoot, "lib/intel64/")
+    local tbb64 = nil
+    local tbb32 = nil
+
+    if backend == "mkl_tbb_thread" then
+        if tbbRoot == nil then
+            errorf("TBB root is not set, but tbb backend was requested. Please source the tbbvars.sh correctly.")
+        end
+        tbb64 = path.join(tbbRoot, "lib/intel64/")
+        tbb32 = path.join(tbbRoot, "lib/ia32/")
+    end
+
     filter "architecture:not x86"
         local linkGroup = {}
         
         table.insert( linkGroup, mklLib( mkl64, backend) )
+        
+        if tbb64 ~= nil then
+            table.insert( linkGroup, mklLib( tbb64, "vc14/tbb") )
+        end
 
         if zpm.setting("intel") then
             table.insert( linkGroup, mklLib( mkl64, "mkl_intel_lp64" ) )
@@ -107,11 +125,15 @@ local function linkMKL(icpp, backend)
 
         linkGroupedLinks(linkGroup, mkl64)
 
-    local mkl32 = path.join(icpp, "lib/ia32/")
+    local mkl32 = path.join(mklRoot, "lib/ia32/")
     filter "architecture:x86"
         local linkGroup = {}
         
-            table.insert( linkGroup, mklLib( mkl32, backend) )
+        table.insert( linkGroup, mklLib( mkl32, backend) )
+    
+        if tbb32 ~= nil then
+            table.insert( linkGroup, mklLib( tbb32, "vc14/tbb") )
+        end
             
         if zpm.setting("intel") then
             if os.ishost("windows") then
@@ -132,29 +154,57 @@ local function linkMKL(icpp, backend)
 
 
         linkGroupedLinks(linkGroup, mkl32)
+
+    filter {}
+end
+
+local function relinkTBB(tbbRoot, backend)
+    local tbb64 = nil
+    local tbb32 = nil
+
+    if backend == "mkl_tbb_thread" then
+        if tbbRoot == nil then
+            errorf("TBB root is not set, but tbb backend was requested. Please source the tbbvars.sh correctly.")
+        end
+        tbb64 = path.join(tbbRoot, "lib/intel64/")
+        tbb32 = path.join(tbbRoot, "lib/ia32/")
+    end
+
+    if tbb64 ~= nil then
+        filter "architecture:not x86"
+            links( mklLib( tbb64, "vc14/tbb") )
+    end
+
+    local mkl32 = path.join(mklRoot, "lib/ia32/")
+    if tbb32 ~= nil then
+        filter "architecture:x86"
+            links( mklLib( tbb32, "vc14/tbb") )
+    end
+
+    filter {}
 end
 
 project "MKL"
     kind "StaticLib"
 
-    local icpp = getICCVersion()
+    local mklRoot, tbbRoot = getICCVersion()
 
-    if icpp then
+    if mklRoot then
         local backend = getMKLBackend()
 
         zpm.export(function()
-            includedirs(path.join(icpp, "include/"))
+            includedirs(path.join(mklRoot, "include/"))
 
             if os.ishost("linux") then
-                linkMKL(icpp, backend)
+                linkMKL(mklRoot, tbbRoot, backend)
             end
+
+            relinkTBB(tbbRoot, backend)
         end)
 
         if not os.ishost("linux") then
-            linkMKL(icpp, backend)
+            linkMKL(mklRoot, tbbRoot, backend)
         end
-
-        filter {}
     else
         warningf("MKL not found on this computer, please check your libraries!")
     end

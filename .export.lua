@@ -162,26 +162,30 @@ local function relinkTBB(tbbRoot, backend)
     local tbb64 = nil
     local tbb32 = nil
 
-    if backend == "mkl_tbb_thread" then
-        if tbbRoot == nil then
-            errorf("TBB root is not set, but tbb backend was requested. Please source the tbbvars.sh correctly.")
+    if os.istarget("windows") then 
+        if backend == "mkl_tbb_thread" then
+            if tbbRoot == nil then
+                errorf("TBB root is not set, but tbb backend was requested. Please source the tbbvars.sh correctly.")
+            end
+            tbb64 = path.join(tbbRoot, "lib/intel64/")
+            tbb32 = path.join(tbbRoot, "lib/ia32/")
         end
-        tbb64 = path.join(tbbRoot, "lib/intel64/")
-        tbb32 = path.join(tbbRoot, "lib/ia32/")
-    end
 
-    if tbb64 ~= nil then
-        filter "architecture:not x86"
-            links( mklLib( tbb64, "vc14/tbb") )
-    end
+        if tbb64 ~= nil then
+            filter "architecture:not x86"
+                links( mklLib( tbb64, "vc14/tbb") )
+        end
 
-    local mkl32 = path.join(mklRoot, "lib/ia32/")
-    if tbb32 ~= nil then
-        filter "architecture:x86"
-            links( mklLib( tbb32, "vc14/tbb") )
-    end
+        local mkl32 = path.join(mklRoot, "lib/ia32/")
+        if tbb32 ~= nil then
+            filter "architecture:x86"
+                links( mklLib( tbb32, "vc14/tbb") )
+        end
 
-    filter {}
+        filter {}
+    else
+        links("tbb")
+    end
 end
 
 project "MKL"

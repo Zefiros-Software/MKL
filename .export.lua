@@ -184,7 +184,9 @@ local function relinkTBB(tbbRoot, backend)
 
         filter {}
     else
-        links("tbb")
+        if backend == "mkl_tbb_thread" then
+            links("tbb")
+        end
     end
 end
 

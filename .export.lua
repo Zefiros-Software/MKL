@@ -101,13 +101,19 @@ local function linkMKL(mklRoot, tbbRoot, backend)
         tbb32 = path.join(tbbRoot, "lib/ia32/")
     end
 
-    filter "architecture:not x86"
+    filter "architecture:x86_64"
         local linkGroup = {}
         
         table.insert( linkGroup, mklLib( mkl64, backend) )
         
-        if tbb64 ~= nil then
-            table.insert( linkGroup, mklLib( tbb64, "vc14/tbb") )
+        if tbb64  then
+            if os.ishost("windows") then 
+                table.insert( linkGroup, mklLib( tbb64, "vc14/tbb") )
+            else
+                -- The tbb link here is not exported via links
+                -- links { "tbb" }
+                table.insert( linkGroup, "tbb" )
+            end
         end
 
         if zpm.setting("intel") then
@@ -131,8 +137,14 @@ local function linkMKL(mklRoot, tbbRoot, backend)
         
         table.insert( linkGroup, mklLib( mkl32, backend) )
     
-        if tbb32 ~= nil then
-            table.insert( linkGroup, mklLib( tbb32, "vc14/tbb") )
+        if tbb32  then
+            if os.ishost("windows") then 
+                table.insert( linkGroup, mklLib( tbb32, "vc14/tbb") )
+            else
+                -- "But  this is exported correctly"
+                -- links { "tbb" }
+                table.insert( linkGroup, "tbb" )
+            end
         end
             
         if zpm.setting("intel") then
@@ -162,7 +174,7 @@ local function relinkTBB(tbbRoot, backend)
     local tbb64 = nil
     local tbb32 = nil
 
-    if os.istarget("windows") then 
+    if os.ishost("windows") then 
         if backend == "mkl_tbb_thread" then
             if tbbRoot == nil then
                 errorf("TBB root is not set, but tbb backend was requested. Please source the tbbvars.sh correctly.")
@@ -201,11 +213,12 @@ project "MKL"
         zpm.export(function()
             includedirs(path.join(mklRoot, "include/"))
 
-            if os.ishost("linux") then
+            if os.ishost("windows") then
+                relinkTBB(tbbRoot, backend)
+            else
                 linkMKL(mklRoot, tbbRoot, backend)
             end
 
-            relinkTBB(tbbRoot, backend)
         end)
 
         if not os.ishost("linux") then
